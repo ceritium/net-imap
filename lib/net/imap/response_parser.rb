@@ -371,17 +371,20 @@ module Net
         #                        ; in the response string.
         LITERAL8             = /~\{(\d+)\}\r\n/n
 
+        # A backslash-escaped quoted-special, as unescaped by #unescape_quoted.
+        ESCAPED_QUOTED_SPECIAL = /\\(#{QUOTED_SPECIALS})/n
+
         module_function
 
         def unescape_quoted!(quoted)
           quoted
-            &.gsub!(/\\(#{QUOTED_SPECIALS})/n, "\\1")
+            &.gsub!(ESCAPED_QUOTED_SPECIAL, "\\1")
             &.force_encoding("UTF-8")
         end
 
         def unescape_quoted(quoted)
           quoted
-            &.gsub(/\\(#{QUOTED_SPECIALS})/n, "\\1")
+            &.gsub(ESCAPED_QUOTED_SPECIAL, "\\1")
             &.force_encoding("UTF-8")
         end
 

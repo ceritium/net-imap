@@ -377,9 +377,8 @@ module Net
         module_function
 
         def unescape_quoted!(quoted)
-          quoted
-            &.gsub!(ESCAPED_QUOTED_SPECIAL, "\\1")
-            &.force_encoding("UTF-8")
+          quoted&.gsub!(ESCAPED_QUOTED_SPECIAL, "\\1")
+          quoted&.force_encoding("UTF-8")
         end
 
         def unescape_quoted(quoted)
@@ -2080,7 +2079,7 @@ module Net
         if (match = accept_re(ADDRESS_REGEXP))
           # note that "NIL" isn't captured by the regexp
           name, route, mailbox, host = match.captures
-            .map { Patterns.unescape_quoted _1 }
+            .each { Patterns.unescape_quoted! _1 }
         else # address may include literals
           lpar; name    = addr_name
           SP!;  route   = addr_adl
@@ -2230,7 +2229,7 @@ module Net
               # match ATOM, without a NUMBER, NIL, or PLUS prefix
               return Token.new(T_ATOM, $+)
             elsif $9
-              return Token.new(T_QUOTED, Patterns.unescape_quoted($+))
+              return Token.new(T_QUOTED, Patterns.unescape_quoted!($+))
             elsif $10
               return Token.new(T_LPAR, $+)
             elsif $11
@@ -2268,7 +2267,7 @@ module Net
             elsif $3
               return Token.new(T_NUMBER, $+)
             elsif $4
-              return Token.new(T_QUOTED, Patterns.unescape_quoted($+))
+              return Token.new(T_QUOTED, Patterns.unescape_quoted!($+))
             elsif $5
               literal_token($+)
             elsif $6

@@ -67,7 +67,9 @@ module Net
               matcher = "token&.symbol == %p" % [token]
               desc    = token
             else
-              matcher = "%p.include? token&.symbol" % [token_symbols]
+              # case/when avoids allocating an Array of symbols on every call
+              matcher = "case token&.symbol when %s then true end" %
+                token_symbols.map(&:inspect).join(", ")
               desc    = token_symbols.join(" or ")
             end
 
@@ -120,8 +122,9 @@ module Net
         # That way a loop isn't needed.
         def combine_adjacent(*tokens)
           result = "".b
-          while token = accept(*tokens)
-            result << token.value
+          while tokens.include?(lookahead.symbol)
+            result << @token.value
+            shift_token
           end
           if result.empty?
             parse_error('unexpected token %s (expected %s)',
